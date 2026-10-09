@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#11111b;}
+a{color:#89b4fa;}
+a:hover{color:#b4befe;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:#313244;border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="height:100vh;width:100%;display:flex;flex-direction:column;background:#11111b;color:#cdd6f4;font-family:'Inter',system-ui,sans-serif;overflow:hidden;">
+
+  <div style="flex-shrink:0;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#181825;border-bottom:1px solid #313244;">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+      <img src="bb-icon.png" alt="bb" style="width:22px;height:22px;border-radius:6px;flex-shrink:0;">
+      <span style="font-weight:700;font-size:14px;color:#cdd6f4;">bb</span>
+      <span style="width:1px;height:16px;background:#313244;margin:0 4px;"></span>
+      <span style="font-size:12px;color:#a6adc8;">Agentic IDE</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <span style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#a6e3a1;background:#1e1e2e;border:1px solid #313244;border-radius:999px;padding:4px 10px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#a6e3a1;flex-shrink:0;"></span>
+        Herdr Sidebar plugin · enabled
+      </span>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;min-height:0;">
+
+    <div style="width:240px;flex-shrink:0;background:#181825;border-right:1px solid #313244;display:flex;flex-direction:column;min-height:0;">
+      <div style="flex-shrink:0;padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#6c7086;text-transform:uppercase;">Workspaces</span>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:0 8px 8px;">
+        <sc-for list="{{ orderedGroups }}" as="group" hint-placeholder-count="3">
+          <div onClick="{{ group.select }}" style="cursor:pointer;margin:2px 2px;padding:8px 10px;border-radius:8px;background:{{ group.rowBg }};border:1px solid {{ group.rowBorder }};">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+              <span style="font-size:12px;line-height:1;color:{{ group.iconColor }};flex-shrink:0;">{{ group.icon }}</span>
+              <span style="font-size:13px;font-weight:600;color:#cdd6f4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ group.name }}</span>
+            </div>
+            <div style="padding-left:19px;margin-top:2px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:11px;color:#7f849c;background:#1e1e2e;border-radius:4px;padding:1px 6px;">{{ group.branch }}</span>
+              <span style="font-size:11px;color:#6c7086;">{{ group.agentCount }}</span>
+            </div>
+          </div>
+        </sc-for>
+
+        <div style="margin-top:14px;padding:4px 8px 6px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#6c7086;text-transform:uppercase;">Agents</span>
+          <span style="font-size:10.5px;color:#585b70;">active threads</span>
+        </div>
+        <sc-for list="{{ allAgents }}" as="agentRow" hint-placeholder-count="4">
+          <div onClick="{{ agentRow.select }}" style="cursor:pointer;margin:1px 2px;padding:6px 8px;border-radius:7px;background:{{ agentRow.rowBg }};border:1px solid {{ agentRow.rowBorder }};">
+            <div style="display:flex;align-items:center;gap:7px;min-width:0;">
+              <span style="font-size:12px;line-height:1;color:{{ agentRow.iconColor }};flex-shrink:0;">{{ agentRow.icon }}</span>
+              <span style="font-size:13px;font-weight:600;color:#cdd6f4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ agentRow.name }}</span>
+              <span style="font-size:11.5px;color:#7f849c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ agentRow.groupName }}</span>
+            </div>
+            <sc-if value="{{ showTabRow }}" hint-placeholder-val="{{ true }}">
+              <div style="padding-left:19px;margin-top:2px;font-size:11.5px;color:#6c7086;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ agentRow.tab }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex-shrink:0;border-top:1px solid #313244;padding:10px 12px;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:10.5px;color:#585b70;font-family:'JetBrains Mono',monospace;background:#1e1e2e;border:1px solid #313244;border-radius:4px;padding:2px 6px;">⌃Space</span>
+        <span style="font-size:10.5px;color:#585b70;">then</span>
+        <span style="font-size:10.5px;color:#585b70;font-family:'JetBrains Mono',monospace;background:#1e1e2e;border:1px solid #313244;border-radius:4px;padding:2px 6px;">⌥P</span>
+        <span style="font-size:11px;color:#7f849c;">Command Palette</span>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;background:#1e1e2e;">
+
+      <div style="flex-shrink:0;display:flex;align-items:center;gap:2px;padding:8px 12px 0;border-bottom:1px solid #313244;overflow-x:auto;">
+        <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="2">
+          <div onClick="{{ tab.select }}" style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px 8px 0 0;background:{{ tab.bg }};border:1px solid {{ tab.border }};border-bottom:{{ tab.borderBottom }};margin-bottom:-1px;white-space:nowrap;">
+            <span style="font-size:11.5px;line-height:1;color:{{ tab.iconColor }};">{{ tab.icon }}</span>
+            <span style="font-size:13px;font-weight:600;color:{{ tab.textColor }};">{{ tab.name }}</span>
+            <sc-if value="{{ showTabRow }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:11px;color:#6c7086;">{{ tab.caption }}</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex-shrink:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #313244;">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          <span style="font-size:12px;color:#7f849c;">{{ selected.groupName }}</span>
+          <span style="font-size:11.5px;color:#7f849c;background:#181825;border-radius:4px;padding:1px 6px;">{{ selected.branch }}</span>
+        </div>
+        <span style="font-size:11.5px;font-weight:600;color:{{ selected.iconColor }};text-transform:capitalize;">{{ selected.status }}</span>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+        <sc-for list="{{ selected.messages }}" as="msg" hint-placeholder-count="3">
+          <sc-if value="{{ msg.isApproval }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#181825;border:1px solid #313244;border-radius:10px;padding:14px;max-width:560px;">
+              <div style="font-size:12px;font-weight:600;color:#fab387;margin-bottom:8px;">Bash command approval</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#cdd6f4;background:#11111b;border-radius:6px;padding:8px 10px;margin-bottom:8px;overflow-x:auto;white-space:pre;">{{ msg.command }}</div>
+              <div style="font-size:12px;color:#a6adc8;margin-bottom:12px;">{{ msg.text }}</div>
+              <div style="display:flex;gap:8px;">
+                <span style="font-size:12px;font-weight:600;color:#11111b;background:#a6e3a1;border-radius:6px;padding:5px 12px;">Allow</span>
+                <span style="font-size:12px;font-weight:600;color:#cdd6f4;background:transparent;border:1px solid #313244;border-radius:6px;padding:5px 12px;">Deny</span>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ msg.isTool }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:flex-start;gap:8px;max-width:560px;">
+              <span style="font-size:12px;color:#585b70;flex-shrink:0;margin-top:1px;">●</span>
+              <span style="font-size:12.5px;color:#7f849c;">{{ msg.text }}</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ msg.isAgent }}" hint-placeholder-val="{{ false }}">
+            <div style="max-width:560px;font-size:13.5px;line-height:1.5;color:#cdd6f4;">{{ msg.text }}</div>
+          </sc-if>
+        </sc-for>
+      </div>
+
+      <div style="flex-shrink:0;padding:14px 20px;border-top:1px solid #313244;">
+        <div style="display:flex;align-items:center;gap:10px;background:#181825;border:1px solid #313244;border-radius:10px;padding:10px 14px;">
+          <span style="flex:1;font-size:13px;color:#585b70;">{{ composerPlaceholder }}</span>
+          <span style="font-size:13px;font-weight:600;color:#11111b;background:#cba6f7;border-radius:7px;padding:5px 12px;flex-shrink:0;">Send</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;sortMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;priority&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;priority&quot;,&quot;alphabetical&quot;],&quot;section&quot;:&quot;Sidebar&quot;},&quot;iconStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;symbols&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;symbols&quot;,&quot;dot&quot;],&quot;section&quot;:&quot;Sidebar&quot;},&quot;showTabRow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tabs&quot;}}">
+const AGENTS = [
+  { id: 'a1', name: 'Claude', groupId: 'g1', status: 'blocked', tab: 'bash approval',
+    messages: [
+      { isAgent: true, text: 'Ran the checkout test suite — 3 failures, all timing out on the mocked Stripe webhook.' },
+      { isTool: true, text: 'Explored src/checkout/webhook-handler.ts' },
+      { isApproval: true, command: 'pnpm test checkout --update-snapshots', text: 'Regenerate the webhook fixtures so the suite matches the new mock latency.' },
+    ] },
+  { id: 'a2', name: 'Claude', groupId: 'g2', status: 'done', tab: 'PR #482 opened',
+    messages: [
+      { isAgent: true, text: 'Rewrote the install guide for the new onboarding flow.' },
+      { isTool: true, text: 'Ran: vale docs/install.md — 0 warnings' },
+      { isAgent: true, text: 'PR #482 is up and I tagged you for review.' },
+    ] },
+  { id: 'a3', name: 'Codex', groupId: 'g3', status: 'working', tab: 'running tests',
+    messages: [
+      { isAgent: true, text: 'Refactoring the job queue to use the new retry policy.' },
+      { isTool: true, text: 'Editing src/queue/retry.ts' },
+      { isAgent: true, text: 'Thinking… 42s' },
+    ] },
+  { id: 'a4', name: 'Opencode', groupId: 'g3', status: 'idle', tab: 'idle 14m',
+    messages: [
+      { isAgent: true, text: 'Finished the migration script. Waiting on your go-ahead to run it against staging.' },
+    ] },
+];
+
+const GROUPS = {
+  g1: { name: 'acme-web', branch: 'feat/checkout-fix' },
+  g2: { name: 'docs-site', branch: 'main' },
+  g3: { name: 'api-service', branch: 'refactor/queue' },
+};
+
+const PRIORITY = { blocked: 0, done: 1, working: 2, idle: 3 };
+const STATUS_COLOR = { working: '#89b4fa', idle: '#6c7086', blocked: '#f38ba8', done: '#a6e3a1' };
+const SYMBOLS = { working: '●', idle: '○', blocked: '◉', done: '●' };
+
+class Component extends DCLogic {
+  state = { selectedGroupId: 'g1', selectedAgentId: 'a1' };
+
+  icon(status) {
+    if ((this.props.iconStyle ?? 'symbols') === 'dot') return '●';
+    return SYMBOLS[status];
+  }
+
+  agentsOf(gid) {
+    // workspace/tab order is stable (pane creation order) -- herdr only
+    // rolls status upward, it doesn't resort workspaces or tabs.
+    return AGENTS.filter(a => a.groupId === gid);
+  }
+
+  selectGroup(gid) {
+    const first = this.agentsOf(gid)[0];
+    this.setState({ selectedGroupId: gid, selectedAgentId: first.id });
+  }
+
+  selectAgent(agent) {
+    this.setState({ selectedGroupId: agent.groupId, selectedAgentId: agent.id });
+  }
+
+  renderVals() {
+    const sortMode = this.props.sortMode ?? 'priority';
+    const showTabRow = this.props.showTabRow ?? true;
+    // workspaces stay in a stable (creation) order -- only the flat
+    // Agents list below is an attention-sorted queue.
+    const orderedGroupIds = ['g1', 'g2', 'g3'];
+
+    const groupStatus = (gid) => {
+      const agents = this.agentsOf(gid);
+      return agents.reduce((best, a) => PRIORITY[a.status] < PRIORITY[best.status] ? a : best, agents[0]).status;
+    };
+
+    const orderedGroups = orderedGroupIds.map(gid => {
+      const status = groupStatus(gid);
+      const isSelected = gid === this.state.selectedGroupId;
+      return {
+        name: GROUPS[gid].name,
+        branch: GROUPS[gid].branch,
+        agentCount: `${this.agentsOf(gid).length} agent${this.agentsOf(gid).length === 1 ? '' : 's'}`,
+        icon: this.icon(status),
+        iconColor: STATUS_COLOR[status],
+        rowBg: isSelected ? '#313244' : 'transparent',
+        rowBorder: isSelected ? '#45475a' : 'transparent',
+        select: () => this.selectGroup(gid),
+      };
+    });
+
+    const allAgentsSorted = sortMode === 'priority'
+      ? [...AGENTS].sort((a, b) => PRIORITY[a.status] - PRIORITY[b.status])
+      : [...AGENTS].sort((a, b) => a.name.localeCompare(b.name));
+    const allAgents = allAgentsSorted.map(a => {
+      const isActive = a.id === this.state.selectedAgentId;
+      return {
+        name: a.name,
+        groupName: GROUPS[a.groupId].name,
+        tab: a.tab,
+        icon: this.icon(a.status),
+        iconColor: STATUS_COLOR[a.status],
+        rowBg: isActive ? '#313244' : 'transparent',
+        rowBorder: isActive ? '#45475a' : 'transparent',
+        select: () => this.selectAgent(a),
+      };
+    });
+
+    const tabs = this.agentsOf(this.state.selectedGroupId).map(a => {
+      const isActive = a.id === this.state.selectedAgentId;
+      return {
+        name: a.name,
+        caption: a.tab,
+        icon: this.icon(a.status),
+        iconColor: STATUS_COLOR[a.status],
+        textColor: isActive ? '#cdd6f4' : '#a6adc8',
+        bg: isActive ? '#1e1e2e' : 'transparent',
+        border: isActive ? '#313244' : 'transparent',
+        borderBottom: isActive ? '1px solid #1e1e2e' : '1px solid transparent',
+        select: () => this.setState({ selectedAgentId: a.id }),
+      };
+    });
+
+    const sel = AGENTS.find(a => a.id === this.state.selectedAgentId) ?? AGENTS[0];
+    const selected = {
+      status: sel.status,
+      iconColor: STATUS_COLOR[sel.status],
+      groupName: GROUPS[sel.groupId].name,
+      branch: GROUPS[sel.groupId].branch,
+      messages: sel.messages,
+    };
+
+    return {
+      orderedGroups,
+      allAgents,
+      tabs,
+      showTabRow,
+      selected,
+      composerPlaceholder: `Message ${sel.name}…`,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
