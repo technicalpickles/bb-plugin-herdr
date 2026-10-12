@@ -10,19 +10,20 @@ import { createPortal } from "react-dom";
 import { isListed, STATUS, statusOf, workspaceKey } from "./status";
 import { InlineTitle } from "./InlineTitle";
 import { WorkspaceSidebar } from "./Sidebar";
-import { ThreadContextMenu, type ThreadMenuPosition } from "./ThreadContextMenu";
+import { ThreadMenu } from "./ThreadMenu";
 import {
   definePluginApp,
-  experimental_useSidebarThreadActions as useSidebarThreadActions,
   experimental_useSidebarThreads as useSidebarThreads,
+  useBbNavigate,
+  useSdk,
   type PluginSidebarThread,
   type PluginThreadHeaderActionProps,
 } from "@get-bb/plugin-sdk/app";
 
 function TabRow({ threadId }: { threadId: string }) {
   const { threads } = useSidebarThreads();
-  const actions = useSidebarThreadActions();
-  const [menu, setMenu] = useState<ThreadMenuPosition | null>(null);
+  const navigate = useBbNavigate();
+  const sdk = useSdk();
   const [renamingId, setRenamingId] = useState<string | null>(null);
 
   const current = threads.find((thread) => thread.id === threadId);
@@ -95,24 +96,20 @@ function TabRow({ threadId }: { threadId: string }) {
                 style={{ width: 150 }}
                 onDone={(title) => {
                   setRenamingId(null);
-                  if (title) void actions.rename(thread.id, title);
+                  if (title) void sdk.threads.update({ threadId: thread.id, title });
                 }}
               />
             </div>
           );
         }
         return (
+          <ThreadMenu key={thread.id} thread={thread} onRename={setRenamingId}>
           <button
-            key={thread.id}
             type="button"
             role="tab"
             aria-selected={active}
             title={`${thread.displayTitle} — ${status.label}`}
-            onClick={() => actions.open(thread.id)}
-            onContextMenu={(event) => {
-              event.preventDefault();
-              setMenu({ x: event.clientX, y: event.clientY, thread });
-            }}
+            onClick={() => navigate.toThread(thread.id)}
             style={tabStyle}
           >
             {glyph}
@@ -131,6 +128,7 @@ function TabRow({ threadId }: { threadId: string }) {
               </span>
             ) : null}
           </button>
+          </ThreadMenu>
         );
       })}
       <button
@@ -138,7 +136,7 @@ function TabRow({ threadId }: { threadId: string }) {
         aria-label="New thread in this workspace"
         title="New thread in this workspace"
         onClick={() =>
-          actions.openNewThread({
+          navigate.toCompose({
             projectId: current.projectId,
             environmentId,
             focusPrompt: true,
@@ -154,14 +152,6 @@ function TabRow({ threadId }: { threadId: string }) {
       >
         +
       </button>
-      {menu ? (
-        <ThreadContextMenu
-          position={menu}
-          onClose={() => setMenu(null)}
-          onRename={setRenamingId}
-          currentThreadId={threadId}
-        />
-      ) : null}
     </div>
   );
 }

@@ -2,8 +2,9 @@
 // status) and a flat Agents list sorted by attention priority.
 import { useMemo, useState } from "react";
 import {
-  experimental_useSidebarThreadActions as useSidebarThreadActions,
   experimental_useSidebarThreads as useSidebarThreads,
+  useBbNavigate,
+  useSdk,
   type PluginSidebarThread,
   type PluginThreadListProps,
 } from "@get-bb/plugin-sdk/app";
@@ -17,7 +18,7 @@ import {
   type AgentStatus,
 } from "./status";
 import { InlineTitle } from "./InlineTitle";
-import { ThreadContextMenu, type ThreadMenuPosition } from "./ThreadContextMenu";
+import { ThreadMenu } from "./ThreadMenu";
 
 const IDLE_AGENTS_SHOWN = 10;
 
@@ -109,8 +110,8 @@ export function WorkspaceSidebar({
   onNavigate,
 }: PluginThreadListProps) {
   const { threads, projects } = useSidebarThreads();
-  const actions = useSidebarThreadActions();
-  const [menu, setMenu] = useState<ThreadMenuPosition | null>(null);
+  const navigate = useBbNavigate();
+  const sdk = useSdk();
   const [renamingId, setRenamingId] = useState<string | null>(null);
 
   const { workspaces, agents } = useMemo(() => {
@@ -158,7 +159,7 @@ export function WorkspaceSidebar({
     : null;
 
   const open = (id: string) => {
-    actions.open(id);
+    navigate.toThread(id);
     onNavigate?.();
   };
 
@@ -216,7 +217,7 @@ export function WorkspaceSidebar({
                   style={{ fontSize: 13, fontWeight: 600 }}
                   onDone={(title) => {
                     setRenamingId(null);
-                    if (title) void actions.rename(thread.id, title);
+                    if (title) void sdk.threads.update({ threadId: thread.id, title });
                   }}
                 />
               </div>
@@ -224,8 +225,8 @@ export function WorkspaceSidebar({
           );
         }
         return (
+          <ThreadMenu key={thread.id} thread={thread} onRename={setRenamingId}>
           <a
-            key={thread.id}
             href={thread.href}
             data-sidebar-thread-shortcut-target=""
             data-sidebar-thread-id={thread.id}
@@ -240,10 +241,6 @@ export function WorkspaceSidebar({
               }
               event.preventDefault();
               open(thread.id);
-            }}
-            onContextMenu={(event) => {
-              event.preventDefault();
-              setMenu({ x: event.clientX, y: event.clientY, thread });
             }}
             style={rowStyle(thread.id === activeThreadId)}
           >
@@ -261,16 +258,9 @@ export function WorkspaceSidebar({
               {thread.indicatorLabel ?? STATUS[status].label}
             </div>
           </a>
+          </ThreadMenu>
         );
       })}
-      {menu ? (
-        <ThreadContextMenu
-          position={menu}
-          onClose={() => setMenu(null)}
-          onRename={setRenamingId}
-          currentThreadId={activeThreadId}
-        />
-      ) : null}
     </nav>
   );
 }
